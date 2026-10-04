@@ -5,6 +5,8 @@ readonly usernameInput:Locator;
 readonly passwordInput:Locator;
 readonly loginButton:Locator;
 readonly errorMessage:Locator;
+readonly menuButton: Locator;
+readonly logoutLink: Locator;
 
 constructor(page:Page){
     this.page = page;
@@ -12,6 +14,8 @@ constructor(page:Page){
     this.passwordInput = page.locator('#password');
     this.loginButton = page.locator('#login-button');
     this.errorMessage = page.locator('[data-test="error"]');
+    this.menuButton = page.locator('#react-burger-menu-btn');
+    this.logoutLink = page.locator('#logout_sidebar_link');
 }
 
 async goto() {
@@ -23,4 +27,9 @@ async login(username:string, password:string){
     await this.passwordInput.fill(password);
     await this.loginButton.click();
 }
+
+  async logout() {
+    await this.menuButton.click();
+    await this.logoutLink.click();
+  }
 }
