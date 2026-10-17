@@ -19,7 +19,13 @@ constructor(page:Page){
 }
 
 async goto() {
-    await this.page.goto(process.env.BASE_URL!);
+    const baseUrl = process.env.BASE_URL;
+
+    if (!baseUrl) {
+        throw new Error('BASE_URL environment variable is not set. Please define it before navigating to the login page.');
+    }
+
+    await this.page.goto(baseUrl);
 }
 
 async login(username:string, password:string){

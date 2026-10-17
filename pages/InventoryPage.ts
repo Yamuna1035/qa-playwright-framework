@@ -1,6 +1,7 @@
 import { Locator, Page } from "@playwright/test";
 export class InventoryPage{
     readonly page:Page
+    readonly productsHeading:Locator
     readonly productTitles:Locator
     readonly addToCartButtons:Locator
     readonly cartIcon:Locator
@@ -8,6 +9,7 @@ export class InventoryPage{
 
     constructor(page:Page){
         this.page = page;
+        this.productsHeading = page.getByText("Products", { exact: true });
         this.productTitles = page.locator(".inventory_item_name");
         this.addToCartButtons = page.locator('button:has-text("Add to cart")');    
         this.cartIcon = page.locator('.shopping_cart_link');
