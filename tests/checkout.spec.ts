@@ -1,18 +1,10 @@
-import {test, expect} from "@playwright/test"
-import { LoginPage } from "../pages/LoginPage"
-import { InventoryPage } from "../pages/InventoryPage"
+import {test, expect} from "../fixtures/auth.fixture"
 import { CartPage } from "../pages/CartPage"
 import { CheckoutPage } from "../pages/CheckoutPage"
 
-test('complete checkout flow with one product', async ({page})=>{
-   const loginPage = new LoginPage(page);
-   const inventoryPage = new InventoryPage(page);
+test('complete checkout flow with one product', async ({page, inventoryPage})=>{
    const cartPage = new CartPage(page);
    const checkoutPage = new CheckoutPage(page);
-
-   //step 1 login
-   await loginPage.goto();
-   await loginPage.login('standard_user', 'secret_sauce');
 
    //step 2: Add product to cart
    await inventoryPage.addFirstProductToCart();
@@ -26,4 +18,45 @@ test('complete checkout flow with one product', async ({page})=>{
 
    //step 5: Verify we move to next page
    await expect(page).toHaveURL(/checkout-step-two/);
+
+   //step 6: Complete the purchase
+   await checkoutPage.finishCheckout();
+   await expect(page).toHaveURL(/checkout-complete/);
+   await expect(checkoutPage.orderConfirmationHeading).toBeVisible();
+})
+
+test('checkout requires first name', async ({page, inventoryPage})=>{
+   const cartPage = new CartPage(page);
+   const checkoutPage = new CheckoutPage(page);
+
+   await inventoryPage.goToCart();
+   await cartPage.clickCheckout();
+   await checkoutPage.fillCheckoutInfo('', 'P', '560001');
+
+   await expect(checkoutPage.errorMessage).toHaveText('Error: First Name is required');
+   await expect(page).toHaveURL(/checkout-step-one/);
+})
+
+test('checkout requires last name', async ({page, inventoryPage})=>{
+   const cartPage = new CartPage(page);
+   const checkoutPage = new CheckoutPage(page);
+
+   await inventoryPage.goToCart();
+   await cartPage.clickCheckout();
+   await checkoutPage.fillCheckoutInfo('Yamuna', '', '560001');
+
+   await expect(checkoutPage.errorMessage).toHaveText('Error: Last Name is required');
+   await expect(page).toHaveURL(/checkout-step-one/);
+})
+
+test('checkout requires postal code', async ({page, inventoryPage})=>{
+   const cartPage = new CartPage(page);
+   const checkoutPage = new CheckoutPage(page);
+
+   await inventoryPage.goToCart();
+   await cartPage.clickCheckout();
+   await checkoutPage.fillCheckoutInfo('Yamuna', 'P', '');
+
+   await expect(checkoutPage.errorMessage).toHaveText('Error: Postal Code is required');
+   await expect(page).toHaveURL(/checkout-step-one/);
 })
